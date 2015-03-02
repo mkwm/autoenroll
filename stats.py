@@ -32,6 +32,9 @@ class Term(object):
     def _convert_id(self, id):
         self.id = int(id.text)
 
+    def _convert_uuid(self, uuid):
+        self.uuid = uuid
+
     def _convert_class_type(self, class_type):
         self.class_type = class_type['value']
 
@@ -97,7 +100,7 @@ cookies = {
     'JSESSIONID': settings.JSESSIONID,
 }
 
-client = EnrollMeClient(settings.URL, settings.VIEW_STATE, settings.JSESSIONID)
+client = EnrollMeClient(settings.ENROLL_URL, settings.VIEW_STATE, settings.JSESSIONID)
 subject_by_id = dict([(s.id, s) for s in client.get_subjects()])
 teacher_by_id = dict([(t.id, t) for t in client.get_teachers()])
 term_by_id = {}
@@ -128,7 +131,7 @@ locale.setlocale(locale.LC_TIME, 'pl_PL.utf8')
 import paramiko
 import os
 
-hostname = 'hostname'
+hostname = settings.SSH_HOSTNAME
 host_keys = paramiko.util.load_host_keys(os.path.expanduser('~/.ssh/known_hosts'))
 
 if hostname in host_keys:
@@ -137,12 +140,12 @@ if hostname in host_keys:
     print('Using host key of type %s' % hostkeytype)
 
 t = paramiko.Transport((hostname, 22))
-t.connect(hostkey, 'username', 'password')
+t.connect(hostkey, settings.SSH_USERNAME, settings.SSH_PASSWORD)
 sftp = paramiko.SFTPClient.from_transport(t)
 
 from jinja2 import Environment, PackageLoader
 env = Environment(loader=PackageLoader('stats', 'templates'))
 template = env.get_template('stats.html')
-with sftp.open('stats.html', 'w') as f:
+with sftp.open('WWW/stats/' + sys.argv[1], 'w') as f:
     f.write(template.render(terms_by_subject=terms_by_subject, terms_max_preciousness=TERMS_MAX_PRECIOUSNESS, now=datetime.now()))
 settings.driver.quit()

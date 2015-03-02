@@ -105,6 +105,46 @@ class EnrollMeClient(object):
             data['form:certain_input'] = 'on'
         self.session.post(self.url, data=data)
 
+    def _select_term_by_uuid(self, uuid):
+        data = {
+            'javax.faces.partial.ajax': 'true',
+            'javax.faces.source': 'form:j_id_1v',
+            'javax.faces.partial.execute': 'form:j_id_1v',
+            'javax.faces.partial.render': 'form:eventDetails',
+            'javax.faces.behavior.event': 'eventSelect',
+            'javax.faces.partial.event': 'eventSelect',
+            'form:j_id_1v_selectedEventId': uuid,
+            'javax.faces.ViewState': self.view_state,
+        }
+        self.session.post(self.url, data=data)
+
+    def update_term(self, term):
+        date = term.date + timedelta(hours=1)
+        self._select_term_by_uuid(term.uuid)
+        data = {
+            'javax.faces.partial.ajax': 'true',
+            'javax.faces.source': 'form:j_id_35',
+            'javax.faces.partial.execute': '@all',
+            'javax.faces.partial.render': 'form:messages',
+            'form:j_id_35': 'form:j_id_35',
+            'form:subjectChoice_hinput': term.subject.id,
+            'form:teacherChoice_hinput': term.teacher.id,
+            'form:place': term.location,
+            'form:type': term.class_type,
+            'form:capacity': term.max_people,
+            'form:minimalCapacity': term.min_people,
+            'form:divisibility': term.team_size,
+            'form:weekType_input': 'YEAR_' + (term.year if term.year else 'ALL'),
+            'form:firstOccurrence_input': date.strftime('%m/%d/%Y %H:%M:%S'),
+            'form:lastOccurrence_input': '06/22/2015 23:59:59',
+            'form:departmentGroup': term.group,
+            'form_SUBMIT': '1',
+            'javax.faces.ViewState': self.view_state,
+        }
+        if term.is_certain:
+            data['form:certain_input'] = 'on'
+        self.session.post(self.url, data=data)
+
     def _get_term_by_uuid(self, uuid, term_class):
         data = {
             'javax.faces.partial.ajax': 'true',
@@ -122,6 +162,7 @@ class EnrollMeClient(object):
         update = response.find('update', {'id': 'form:eventDetails'})
         document = BeautifulSoup(update.text)
         term_data = {
+            'uuid': uuid,
             'id': document.find('span', {'id': 'form:termId'}),
             'class_type': document.find('input', {'id': 'form:type'}),
             'group': document.find('input', {'id': 'form:departmentGroup'}),

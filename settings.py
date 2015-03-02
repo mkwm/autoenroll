@@ -1,4 +1,7 @@
+
 # -*- coding: utf-8 -*-
+
+import sys
 
 import os
 from selenium import webdriver
@@ -37,7 +40,13 @@ JSESSIONID = driver.get_cookie('JSESSIONID')['value']
 VIEW_STATE = query['execution'][0]
 
 # Maksymalna ilość punktów do przydzielenia na przedmiot
-MAX_SUBJECT_PRECIOUSNESS = 20
+try:
+    MAX_SUBJECT_PRECIOUSNESS = int(sys.argv[2])
+except IndexError as e:
+    MAX_SUBJECT_PRECIOUSNESS = 20
 
 # Maksymalna ilość punktów do przydzielenia na termin
-MAX_TERM_PRECIOUSNESS = 8
+try:
+    MAX_TERM_PRECIOUSNESS = int(sys.argv[3])
+except IndexError as e:
+    MAX_TERM_PRECIOUSNESS = 8
