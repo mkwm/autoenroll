@@ -1,18 +1,25 @@
 # -*- coding: utf-8 -*-
 
+import os
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from urlparse import urlparse, parse_qs
 
-URL = ''
+ENROLL_URL = os.environ.get('ENROLL_URL')
+ENROLL_USERNAME = os.environ.get('ENROLL_USERNAME')
+ENROLL_PASSWORD = os.environ.get('ENROLL_PASSWORD')
+
+SSH_HOSTNAME = os.environ.get('SSH_HOSTNAME')
+SSH_USERNAME = os.environ.get('SSH_USERNAME')
+SSH_PASSWORD = os.environ.get('SSH_PASSWORD')
 
 driver = webdriver.Chrome()
 driver.maximize_window()
-driver.get(URL)
+driver.get(ENROLL_URL)
 username = driver.find_element_by_id('j_username')
-username.send_keys('')
+username.send_keys(ENROLL_USERNAME)
 password = driver.find_element_by_id('j_password')
-password.send_keys('')
+password.send_keys(ENROLL_PASSWORD)
 submit = driver.find_element_by_id('submit')
 submit.click()
 wait = WebDriverWait(driver, 30)
