@@ -18,34 +18,38 @@
 </div>
 </nav>
 <div class="container">
-{% for subject, terms in terms_by_subject|dictsort %}
+<div class="row">
+<p class="text-center">Statystyki przedstawiają ilość osób, które przydzieliły poszczególnym terminom maksymalną możliwą ilość punktów, w odniesieniu do limitu osób na tych terminach.</p>
+</div>
+{% for subject, terms in terms_by_subject|dictsort if subject.name != 'Algorytmy dla problemów trudnych obliczeniowo' %}
 <div class="row">
 <h2 class="text-center">{{ subject.name }}</h2>
 {% for term in terms|sort %}
 <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
 <div class="text-center">
 <p>{{ term.date.strftime('%a, %H:%M') }} {{ term.year if term.year }}<br>({{ term.teacher.short_name }})</p>
+{% if term.max_people > 0 %}
 {% set percentage = (terms_max_preciousness[term.id] / term.max_people * 100)|round(2) %}
 <p class="text-muted">{{ terms_max_preciousness[term.id] }}/{{ term.max_people }} ({{ percentage }}%)</p>
+{% else %}
+{% set percentage = -1 %}
+<p class="text-muted">{{ terms_max_preciousness[term.id] }}/{{ term.max_people }} (NOPE %)</p>
+{% endif %}
 <div class="progress">
-{% if percentage < 100 %}
+{% if percentage < 0 %}
+<div class="progress-bar" style="width: 100%; font-weight: bold;">NOPE</div>
+{% elif percentage < 100 %}
 <div class="progress-bar progress-bar-success" style="width: {{ percentage / 4 }}%;"></div>
 <div class="progress-bar" style="width: {{ (100 - percentage) / 4 }}%;"></div>
 {% elif percentage|round|int == 100 %}
 <div class="progress-bar progress-bar-info" style="width: 25%;"></div>
 {% elif percentage < 200 %}
-<div class="progress-bar progress-bar-warning" style="width: 25%;"></div>
-<div class="progress-bar progress-bar-warning progress-bar-striped" style="width: {{ (percentage - 100) / 100 * 25 }}%;"></div>
+<div class="progress-bar progress-bar-warning progress-bar-striped" style="width: {{ 25 + (percentage - 100) / 100 * 25 }}%;"></div>
+{% elif percentage < 400 %}
+<div class="progress-bar progress-bar-danger progress-bar-striped" style="width: {{ 50 + (percentage - 200) / 200 * 25 }}%;"></div>
 {% else %}
-<div class="progress-bar progress-bar-danger" style="width: 25%;"></div>
-{% if percentage < 400 %}
-<div class="progress-bar progress-bar-danger progress-bar-striped" style="width: {{ 25 + (percentage - 200) / 200 * 25 }}%;"></div>
-{% else %}
-{% if percentage > 800 %}
-{% set percentage = 800 %}
-{% endif %}
-<div class="progress-bar progress-bar-danger progress-bar-striped active" style="width: {{ 50 + (percentage - 400) / 400 * 25 }}%;"></div>
-{% endif %}
+{% if percentage > 800 %}{% set percentage = 800 %}{% endif %}
+<div class="progress-bar" style="width: {{ 75 + (percentage - 400) / 400 * 25 }}%; font-weight: bold; background: url('static/shithappens.gif'); color: #FFF;">SHIT HAPPENS</div>
 {% endif %}
 </div>
 <div class="scale text-muted"><div class="threshold" threshold="100"></div><div class="threshold" threshold="200"></div><div class="threshold" threshold="400"></div><div class="threshold" threshold="800"></div></div>
